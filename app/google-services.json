@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "680155499546",
+    "firebase_url": "https://androidchatapp-c8fad.firebaseio.com",
+    "project_id": "androidchatapp-c8fad",
+    "storage_bucket": "androidchatapp-c8fad.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:680155499546:android:bc3db960f2f1027a",
+        "android_client_info": {
+          "package_name": "com.android.rfchat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "680155499546-face7jc9hquoasindejl2uunsmio6vhm.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.android.rfchat",
+            "certificate_hash": "68457ba3214eebb103f2bd35ecd6e5172eb173c0"
+          }
+        },
+        {
+          "client_id": "680155499546-n3ki7i5u9jn2l10rij59ubflp5ueve50.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3AYrAFqG3ow1RHJieQuAp_QnuoAtOu8o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "680155499546-n3ki7i5u9jn2l10rij59ubflp5ueve50.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

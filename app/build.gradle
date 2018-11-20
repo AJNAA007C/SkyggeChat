@@ -1,0 +1,68 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'bhrivchat'
+            keyPassword '123456a@'
+            storeFile file('../bhrivchat.jks')
+            storePassword '123456a@'
+        }
+    }
+    compileSdkVersion 27
+    buildToolsVersion '27.0.2'
+    defaultConfig {
+        applicationId 'com.android.rfchat'
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+        debug {
+            signingConfig signingConfigs.config
+        }
+    }
+    productFlavors {
+    }
+    useLibrary  'org.apache.http.legacy'
+
+}
+
+repositories {
+    maven {
+        url "https://jitpack.io"
+    }
+}
+
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.android.support:design:27.1.1'
+    compile 'com.google.firebase:firebase-core:9.8.0'
+    compile 'com.google.firebase:firebase-database:9.8.0'
+    compile 'com.google.firebase:firebase-auth:9.8.0'
+    testCompile 'junit:junit:4.12'
+    implementation 'com.github.aagarwal1012:Image-Steganography-Library-Android:v1.0'
+    compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.yarolegovich:lovely-dialog:1.0.4'
+    compile 'com.android.support:cardview-v7:27.0.2'
+    compile 'com.android.support:percent:27.0.2'
+    implementation project(path: ':Webservice_Helper')
+    compile 'org.apache.httpcomponents:httpcore:4.4.1'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'com.github.bumptech.glide:glide:4.0.0'
+    compile 'net.gotev:uploadservice:2.1'
+
+}
+apply plugin: 'com.google.gms.google-services'
