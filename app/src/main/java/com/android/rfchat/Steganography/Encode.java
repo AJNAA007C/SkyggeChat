@@ -18,6 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.rfchat.R;
+import com.android.rfchat.data.StaticConfig;
+import com.android.rfchat.model.Message;
+import com.android.rfchat.ui.ChatActivity;
 import com.arkive.webservices.Retrofit_Helper;
 import com.arkive.webservices.Web_Interface;
 import com.ayush.imagesteganographylibrary.Text.AsyncTaskCallback.TextDecodingCallback;
@@ -25,6 +28,7 @@ import com.ayush.imagesteganographylibrary.Text.AsyncTaskCallback.TextEncodingCa
 import com.ayush.imagesteganographylibrary.Text.ImageSteganography;
 import com.ayush.imagesteganographylibrary.Text.TextDecoding;
 import com.ayush.imagesteganographylibrary.Text.TextEncoding;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.JsonObject;
 
 import net.gotev.uploadservice.MultipartUploadRequest;
@@ -71,6 +75,9 @@ public class Encode extends AppCompatActivity implements TextEncodingCallback , 
     //Objects needed for encoding
     TextEncoding textEncoding;
     ImageSteganography imageSteganography, result;
+    String roomId="";
+    String idFriend="";
+    String nameFriend="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +85,9 @@ public class Encode extends AppCompatActivity implements TextEncodingCallback , 
         setContentView(R.layout.acivity_encode);
 
         //initialized the UI components
-
+roomId=getIntent().getStringExtra("roomid");
+idFriend=getIntent().getStringExtra(StaticConfig.INTENT_KEY_CHAT_ID);
+        nameFriend=getIntent().getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
         whether_encoded = (TextView) findViewById(R.id.whether_encoded);
 
         imageView = (ImageView) findViewById(R.id.imageview);
@@ -289,9 +298,20 @@ public class Encode extends AppCompatActivity implements TextEncodingCallback , 
 
                                 JSONObject object1 = new JSONObject(msg);
                                 String s = object1.getString("image_path");
+                                Log.i("resp7", Retrofit_Helper.image_url+s);
                                 Intent intent = new Intent();
                                 intent.putExtra("image", Retrofit_Helper.image_url+s);
+                                Message newMessage = new Message();
+                                newMessage.text = Retrofit_Helper.image_url+s;
+                                newMessage.idSender = StaticConfig.UID;
+                                newMessage.idReceiver = roomId;
+                                newMessage.timestamp = System.currentTimeMillis();
+                                FirebaseDatabase.getInstance().getReference().child("message/" + roomId).push().setValue(newMessage);
                                 setResult(RESULT_OK, intent);
+                                Intent in=new Intent(getApplicationContext(),ChatActivity.class);
+                                in.putExtra(StaticConfig.INTENT_KEY_CHAT_ID,idFriend);
+                                in.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND,nameFriend);
+                                in.putExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID,roomId);
                                 finish();
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -359,6 +379,7 @@ public class Encode extends AppCompatActivity implements TextEncodingCallback , 
             ProgressDialog progressDialog = new ProgressDialog(Encode.this);
             progressDialog.setTitle("Saving Image");
             progressDialog.setMessage("Loading Please Wait...");
+            progressDialog.setCancelable(false);
             progressDialog.show();
 
             File file = getApplicationContext().getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS);

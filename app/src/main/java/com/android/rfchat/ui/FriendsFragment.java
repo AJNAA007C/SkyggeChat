@@ -545,20 +545,22 @@ class ListFriendsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 mapChildListener.put(id, new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        HashMap mapMessage = (HashMap) dataSnapshot.getValue();
-                        if (mapMark.get(id) != null) {
-                            if (!mapMark.get(id)) {
-                                listFriend.getListFriend().get(position).message.text = id + mapMessage.get("text");
-                            } else {
-                                listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
-                            }
-                            notifyDataSetChanged();
-                            mapMark.put(id, false);
-                        } else {
-                            listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
-                            notifyDataSetChanged();
-                        }
-                        listFriend.getListFriend().get(position).message.timestamp = (long) mapMessage.get("timestamp");
+                       try {
+                           HashMap mapMessage = (HashMap) dataSnapshot.getValue();
+                           if (mapMark.get(id) != null) {
+                               if (!mapMark.get(id)) {
+                                   listFriend.getListFriend().get(position).message.text = id + mapMessage.get("text");
+                               } else {
+                                   listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
+                               }
+                               notifyDataSetChanged();
+                               mapMark.put(id, false);
+                           } else {
+                               listFriend.getListFriend().get(position).message.text = (String) mapMessage.get("text");
+                               notifyDataSetChanged();
+                           }
+                           listFriend.getListFriend().get(position).message.timestamp = (long) mapMessage.get("timestamp");
+                       }catch (Exception e){}
                     }
 
                     @Override

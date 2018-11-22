@@ -75,7 +75,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private LinearLayoutManager linearLayoutManager;
     public static HashMap<String, Bitmap> bitmapAvataFriend;
     public Bitmap bitmapAvataUser;
-
+    String nameFriend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         Intent intentData = getIntent();
         idFriend = intentData.getCharSequenceArrayListExtra(StaticConfig.INTENT_KEY_CHAT_ID);
         roomId = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_ROOM_ID);
-        String nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
+         nameFriend = intentData.getStringExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND);
 
         consersation = new Consersation();
         btnSend = (ImageButton) findViewById(R.id.btnSend);
@@ -160,18 +160,19 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        adapter.notifyDataSetChanged();
         if (requestCode == 1) {
             if(resultCode == RESULT_OK) {
                 String content = data.getStringExtra("image");
                 if (content.length() > 0) {
                     editWriteMessage.setText("");
-                    Message newMessage = new Message();
-                    newMessage.text = content;
-                    newMessage.idSender = StaticConfig.UID;
-                    newMessage.idReceiver = roomId;
-                    newMessage.timestamp = System.currentTimeMillis();
-                    FirebaseDatabase.getInstance().getReference().child("message/" + roomId).push().setValue(newMessage);
-                    adapter.notifyDataSetChanged();
+//                    Message newMessage = new Message();
+//                    newMessage.text = content;
+//                    newMessage.idSender = StaticConfig.UID;
+//                    newMessage.idReceiver = roomId;
+//                    newMessage.timestamp = System.currentTimeMillis();
+//                    FirebaseDatabase.getInstance().getReference().child("message/" + roomId).push().setValue(newMessage);
+
                 }
             }
         }
@@ -200,7 +201,12 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             }
         }if (view.getId() == R.id.btnchoosefromlib) {
             Intent in =new Intent(getApplicationContext(),Encode.class);
-            startActivityForResult(in,1);
+            in.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            in.putExtra("roomid",roomId);
+            in.putExtra(StaticConfig.INTENT_KEY_CHAT_ID,idFriend);
+            in.putExtra(StaticConfig.INTENT_KEY_CHAT_FRIEND,nameFriend);
+            startActivity(in);
+
             /*String content = editWriteMessage.getText().toString().trim();
             if (content.length() > 0) {
                 editWriteMessage.setText("");
@@ -252,123 +258,14 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         if (holder instanceof ItemMessageFriendHolder) {
             if (consersation.getListMessageData().get(position).text.startsWith("http://")) {
-                Log.i("kkkkk",consersation.getListMessageData().get(position).text);
-                Glide
-                        .with(context)
-                        .asBitmap()
-                        .load(consersation.getListMessageData().get(position).text)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(Bitmap resource, Transition<? super Bitmap> transition) {
-                                ((ItemMessageFriendHolder) holder).image.setImageBitmap(resource);
-                                bitmap .add(resource);
-                            }
-
-//                            @Override
-//                            public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-//                                // you can do something with loaded bitmap here
-//
-//                            }
-                        });
-                ((ItemMessageFriendHolder) holder).image.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
-
-                        //AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
-
-                        // Setting Dialog Title
-                        alertDialog.setTitle("PASSWORD");
-
-                        // Setting Dialog Message
-                        alertDialog.setMessage("Enter Password");
-                        final EditText input = new EditText(activity);
-                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.MATCH_PARENT);
-                        input.setLayoutParams(lp);
-                        alertDialog.setView(input);
-                        //alertDialog.setView(input);
-
-                        // Setting Icon to Dialog
-
-                        // Setting Positive "Yes" Button
-                        alertDialog.setPositiveButton("YES",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog,int which) {
-                                        // Write your code here to execute after dialog
-                                        SharedPreferenceHelper prefHelper = SharedPreferenceHelper.getInstance(context);
-                                         User myAccount;
-                                        myAccount = prefHelper.getUserInfo();
-                                        if(!myAccount.password.equals(input.getText().toString()))
-                                        Toast.makeText(activity,"Password Matched", Toast.LENGTH_SHORT).show();
-                                        else {
-                                            Intent in=new Intent(context,Decode.class);
-                                            in.putExtra("uri",consersation.getListMessageData().get(position).text);
-                                            context.startActivity(in);
-                                        }
-                                    }
-                                });
-                        // Setting Negative "NO" Button
-                        alertDialog.setNegativeButton("NO",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        // Write your code here to execute after dialog
-                                        dialog.cancel();
-                                    }
-                                });
-
-                        // closed
-
-                        // Showing Alert Message
-                        alertDialog.show();
-
-                        //Toast.makeText(context, "decoding has'nt been successfull", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } else {
-                //bitmap .add(null);
-                ((ItemMessageFriendHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
-            }Bitmap currentAvata = bitmapAvata.get(consersation.getListMessageData().get(position).idSender);
-            if (currentAvata != null) {
-                ((ItemMessageFriendHolder) holder).avata.setImageBitmap(currentAvata);
-            } else {
-                final String id = consersation.getListMessageData().get(position).idSender;
-                if (bitmapAvataDB.get(id) == null) {
-                    bitmapAvataDB.put(id, FirebaseDatabase.getInstance().getReference().child("user/" + id + "/avata"));
-                    bitmapAvataDB.get(id).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.getValue() != null) {
-                                String avataStr = (String) dataSnapshot.getValue();
-                                if (!avataStr.equals(StaticConfig.STR_DEFAULT_BASE64)) {
-                                    byte[] decodedString = Base64.decode(avataStr, Base64.DEFAULT);
-                                    ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
-                                } else {
-                                    ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
-                                }
-                                notifyDataSetChanged();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-            }
-        } else if (holder instanceof ItemMessageUserHolder) {
-            //ProgressDialog dialog=new ProgressDialog(context);
-            // dialog.show();
-            if (consersation.getListMessageData().get(position).text.startsWith("http://")) {
                 //new DownloadImage().execute(consersation.getListMessageData().get(position).text);
+                ((ItemMessageFriendHolder) holder).image.setVisibility(View.VISIBLE);
+                ((ItemMessageFriendHolder) holder).txtContent.setVisibility(View.GONE);
                 Glide
                         .with(context)
-                        .asBitmap()
                         .load(consersation.getListMessageData().get(position).text)
-                        .into(  ((ItemMessageUserHolder) holder).image);
-                ((ItemMessageUserHolder) holder).image.setOnClickListener(new View.OnClickListener() {
+                        .into(  ((ItemMessageFriendHolder) holder).image);
+                ((ItemMessageFriendHolder) holder).image.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
@@ -425,6 +322,107 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 });
             } else {
                 //bitmap.add(null);
+                ((ItemMessageFriendHolder) holder).image.setVisibility(View.GONE);
+                ((ItemMessageFriendHolder) holder).txtContent.setVisibility(View.VISIBLE);
+                ((ItemMessageFriendHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
+            }if (bitmapAvataUser != null) {
+                ((ItemMessageFriendHolder) holder).avata.setImageBitmap(bitmapAvataUser);
+            } else {
+                final String id = consersation.getListMessageData().get(position).idSender;
+                if (bitmapAvataDB.get(id) == null) {
+                    bitmapAvataDB.put(id, FirebaseDatabase.getInstance().getReference().child("user/" + id + "/avata"));
+                    bitmapAvataDB.get(id).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.getValue() != null) {
+                                String avataStr = (String) dataSnapshot.getValue();
+                                if (!avataStr.equals(StaticConfig.STR_DEFAULT_BASE64)) {
+                                    byte[] decodedString = Base64.decode(avataStr, Base64.DEFAULT);
+                                    ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length));
+                                } else {
+                                    ChatActivity.bitmapAvataFriend.put(id, BitmapFactory.decodeResource(context.getResources(), R.drawable.default_avata));
+                                }
+                                notifyDataSetChanged();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+        } else if (holder instanceof ItemMessageUserHolder) {
+            //ProgressDialog dialog=new ProgressDialog(context);
+            // dialog.show();
+            if (consersation.getListMessageData().get(position).text.startsWith("http://")) {
+                //new DownloadImage().execute(consersation.getListMessageData().get(position).text);
+                ((ItemMessageUserHolder) holder).image.setVisibility(View.VISIBLE);
+                ((ItemMessageUserHolder) holder).txtContent.setVisibility(View.GONE);
+                Glide
+                        .with(context)
+                        .load(consersation.getListMessageData().get(position).text)
+                        .into(  ((ItemMessageUserHolder) holder).image);
+                         ((ItemMessageUserHolder) holder).image.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        AlertDialog.Builder alertDialog = new AlertDialog.Builder(activity);
+
+                        //AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this).create();
+
+                        // Setting Dialog Title
+                        alertDialog.setTitle("PASSWORD");
+
+                        // Setting Dialog Message
+                        alertDialog.setMessage("Enter Password");
+                        final EditText input = new EditText(activity);
+                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.MATCH_PARENT);
+                        input.setLayoutParams(lp);
+                        alertDialog.setView(input);
+                        // Setting Icon to Dialog
+
+                        // Setting Positive "Yes" Button
+                        alertDialog.setPositiveButton("YES",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int which) {
+                                        // Write your code here to execute after dialog
+                                        SharedPreferenceHelper prefHelper = SharedPreferenceHelper.getInstance(context);
+                                        String myAccount;
+                                        myAccount = prefHelper.getUserPwd();
+                                        Log.i("qwert",myAccount);
+                                        if(!myAccount.equals(input.getText().toString()))
+                                            Toast.makeText(activity,"Password  MissMatch", Toast.LENGTH_SHORT).show();
+                                        else {
+                                            Intent in=new Intent(context,Decode.class);
+                                            in.putExtra("uri",consersation.getListMessageData().get(position).text);
+                                            context.startActivity(in);
+                                        }
+                                    }
+                                });
+                        // Setting Negative "NO" Button
+                        alertDialog.setNegativeButton("NO",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        // Write your code here to execute after dialog
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        // closed
+
+                        // Showing Alert Message
+                        alertDialog.show();
+
+                        //Toast.makeText(context, "decoding has'nt been successfull", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                //bitmap.add(null);
+                ((ItemMessageUserHolder) holder).image.setVisibility(View.GONE);
+                ((ItemMessageUserHolder) holder).txtContent.setVisibility(View.VISIBLE);
                 ((ItemMessageUserHolder) holder).txtContent.setText(consersation.getListMessageData().get(position).text);
             }if (bitmapAvataUser != null) {
                 ((ItemMessageUserHolder) holder).avata.setImageBitmap(bitmapAvataUser);
@@ -498,7 +496,8 @@ class ListMessageAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             super(itemView);
             txtContent = (TextView) itemView.findViewById(R.id.textContentFriend);
             avata = (CircleImageView) itemView.findViewById(R.id.imageView3);
-            this.image = image;
+            image = (ImageView) itemView.findViewById(R.id.image);
+            //this.image = image;
         }
 
 
